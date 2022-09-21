@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Check_Role_and_Skill_before_Activation</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(IF( Active__c , true, false),ISBLANK( Roles__c ) || ISPICKVAL(  Skill__c , &quot;&quot;))</errorConditionFormula>
+    <errorMessage>Can&apos;t activate the module if doesn&apos;t have skills and roles filled.</errorMessage>
+</ValidationRule>
