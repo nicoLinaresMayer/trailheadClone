@@ -1,0 +1,18 @@
+<template>
+    <lightning-card variant="Narrow" title="UNITS" icon-name="standard:account">
+        <template if:true={unitList} for:each={unitList} for:item="unit">
+            <lightning-accordion key={unit.Id} allow-multiple-sections-open>
+                <lightning-layout multiple-rows class="slds-grid_align-spread slds-p-right_small">
+                    <lightning-accordion-section name={unit.Name} label={unit.Name}>
+                        <lightning-layout multiple-rows class="slds-grid_align-spread slds-p-right_small">
+                        <p class="slds-p-horizontal_small">Unit Score: {unit.Unit_Score__c} minutes</p>
+                        <p class="slds-p-horizontal_small">Unit Estimated Time: {unit.Time_Estimated__c}</p>
+                    </lightning-layout><br>
+                    <lightning-button variant="brand" label="Go To The Unit" title="Go to The Unit" data-prop={unit.Id} onclick={viewRecord}></lightning-button>
+                    </lightning-accordion-section>
+                    <lightning-icon icon-name="utility:success" variant="Success" size="small"></lightning-icon>
+                </lightning-layout>
+            </lightning-accordion>
+        </template>
+    </lightning-card>
+</template>

@@ -127,8 +127,10 @@ public with sharing class UnitService {
         }
 
     public class UnitWrapper{
+        @AuraEnabled
         public Unit__c unit; 
         //Registro de Unidad solicitada
+        @AuraEnabled
         public List<Question__c> questionList;    
         //Listado de Preguntas con Opciones relacionadas
 
@@ -138,7 +140,8 @@ public with sharing class UnitService {
         }
     }
 
-    public UnitWrapper getUnitWrapper(Id unitId){
+    @AuraEnabled(cacheable=true)
+    public static UnitWrapper getUnitWrapper(Id unitId){
         return new UnitWrapper([SELECT Id, Content__c, Module__c, Time_Estimated__c, Name, Unit_Score__c FROM Unit__c WHERE Id = :unitId], [SELECT Id, (SELECT Id, Is_Correct__c, Description__c, Name FROM Options__r) FROM Question__c WHERE Unit__c =: unitId]);
     }
 }

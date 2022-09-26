@@ -1,0 +1,18 @@
+<template>
+    <lightning-card variant="Narrow" title="MODULES" icon-name="standard:account">
+        <template if:true={moduleList} for:each={moduleList} for:item="module">
+            <lightning-accordion key={module.Id} allow-multiple-sections-open>
+                <lightning-layout multiple-rows class="slds-grid_align-spread slds-p-right_small">
+                    <lightning-accordion-section name={module.Name} label={module.Name}>
+                        <lightning-layout multiple-rows class="slds-grid_align-spread slds-p-right_small">
+                            <p class="slds-p-horizontal_small">Module Score: {module.Module_Score__c} minutes</p>
+                            <p class="slds-p-horizontal_small">Module Estimated Time: {module.Module_Time_Estimated__c}</p>
+                        </lightning-layout>
+                        <c-unit-view unit-list={module.Units__r}></c-unit-view>
+                    </lightning-accordion-section>
+                    <lightning-icon icon-name="utility:success" variant="Success" size="small"></lightning-icon>
+                </lightning-layout>
+            </lightning-accordion>
+        </template>
+    </lightning-card>
+</template>

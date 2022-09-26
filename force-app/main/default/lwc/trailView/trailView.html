@@ -1,3 +1,21 @@
 <template>
-    <h1>{trail}</h1>
+    <lightning-card if:true={trail}>
+        <h3 slot="title">
+            <lightning-icon icon-name="standard:knowledge" size="small"></lightning-icon>&nbsp;
+             {trail.Name}&emsp;
+        </h3>
+        <p class="slds-p-horizontal_small">Description: {trail.Description__c}</p>
+        <p class="slds-p-horizontal_small">Estimated Time: {trail.Trail_Time__c} minutes</p>
+        <p class="slds-p-horizontal_small">Trail Points: {trail.Trail_Score__c}</p>
+        <div slot="footer">
+            <template if:true={progressTrail}>
+                <p>Trail Progress {progressTrail}%</p>
+                <lightning-progress-bar value={progressTrail} size="large" variant="circular"></lightning-progress-bar>
+            </template>
+            <template if:false={progressTrail}>
+                <p class="slds-p-horizontal_small">Trail Not Started!</p>
+            </template>
+       </div>                
+    </lightning-card>
+        <c-module-view module-list={modulesList}></c-module-view>
 </template>
