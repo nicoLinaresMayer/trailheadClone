@@ -1,0 +1,9 @@
+<template>
+    <template if:true={optionList} for:each={optionList} for:item="option">
+        <lightning-layout key={option.Id} multiple-rows >
+          <lightning-layout-item size="12" padding="around-small">
+            <p onclick={handleClick} data-id={option.Id} class={tileClass}>{option.Description__c}</p>
+          </lightning-layout-item>
+      </lightning-layout>
+      </template>
+</template>

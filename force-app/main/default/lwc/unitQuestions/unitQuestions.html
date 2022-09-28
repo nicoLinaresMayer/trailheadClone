@@ -1,10 +1,7 @@
 <template>
-    <lightning-card  variant="Narrow"  title="Hello" icon-name="standard:account">
-        <lightning-button-icon  icon-name="utility:down" variant="border-filled" alternative-text="Show More" slot="actions"></lightning-button-icon>
-        <p class="slds-p-horizontal_small">Card Body Narrow (custom component)</p>
-        <p slot="footer">Card Footer</p>
-    </lightning-card>
   <template if:true={questionList} for:each={questionList} for:item="question">
-    {question.Name}
+    <lightning-card key={question.Id}  variant="Narrow"  title={question.Name} icon-name="standard:account"> 
+      <c-unit-options option-list={question.Options__r} onoptionselect={handleSelected} option-selected={optionSelected}></c-unit-options>
+    </lightning-card>
   </template>
 </template>

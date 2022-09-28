@@ -142,6 +142,6 @@ public with sharing class UnitService {
 
     @AuraEnabled(cacheable=true)
     public static UnitWrapper getUnitWrapper(Id unitId){
-        return new UnitWrapper([SELECT Id, Content__c, Module__c, Time_Estimated__c, Name, Unit_Score__c FROM Unit__c WHERE Id = :unitId], [SELECT Id, (SELECT Id, Is_Correct__c, Description__c, Name FROM Options__r) FROM Question__c WHERE Unit__c =: unitId]);
+        return new UnitWrapper([SELECT Id, Content__c, Module__c, Time_Estimated__c, Name, Unit_Score__c FROM Unit__c WHERE Id = :unitId], [SELECT Id, Name, (SELECT Id, Is_Correct__c, Description__c, Name FROM Options__r) FROM Question__c WHERE Unit__c =: unitId]);
     }
 }
