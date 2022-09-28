@@ -1,7 +1,9 @@
 <template>
   <template if:true={questionList} for:each={questionList} for:item="question">
     <lightning-card key={question.Id}  variant="Narrow"  title={question.Name} icon-name="standard:account"> 
-      <c-unit-options option-list={question.Options__r} onoptionselect={handleSelected} option-selected={optionSelected}></c-unit-options>
+      <template if:true={question.Options__r} for:each={question.Options__r} for:item="option">
+        <c-unit-options key={option.Id} option={option} onoptionselect={handleSelected} option-selected={optionSelected}></c-unit-options>
+      </template>
     </lightning-card>
   </template>
 </template>

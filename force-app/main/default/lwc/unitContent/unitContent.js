@@ -7,10 +7,6 @@ export default class UnitContent extends LightningElement {
     unit;
     questionList;
 
-   /*  connectedCallback(){
-      publish(this.messageContext, INDV_PROJECT, {questionList: this.questionList});
-    } */
-
     @wire(MessageContext)
     messageContext;
 
@@ -19,17 +15,11 @@ export default class UnitContent extends LightningElement {
       if (data) {
         this.unit = data.unit;
         this.questionList = data.questionList;
-        console.log('UNIT-->', this.unit);
-        console.log('DATA-->', data);
-        
+
         publish(this.messageContext, INDV_PROJECT, {questionList: this.questionList});
-
-
-      } else if (error) {
+        
+    } else if (error) {
          console.error('Error:', error);
       }
     }
-
-    
-
 }

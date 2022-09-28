@@ -1,8 +1,6 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import { MessageContext, subscribe, APPLICATION_SCOPE } from 'lightning/messageService';
 import INDV_PROJECT from '@salesforce/messageChannel/IndividualProject__c'
-
-
 export default class UnitQuestions extends LightningElement {
     questionList;
     subscription = null;
@@ -26,7 +24,6 @@ export default class UnitQuestions extends LightningElement {
     }    
 
     handleSelected(event){
-        console.log('llego al padre handleSelected', event.detail.optionId);
         this.optionSelected = event.detail.optionId;
     }
 }
