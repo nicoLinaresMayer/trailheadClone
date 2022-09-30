@@ -23,6 +23,7 @@
 		<members>Module_Response__c.Status__c</members>
 		<members>Module_Response__c.Total_Unit_Score__c</members>
 		<members>Module_Response__c.Unit_Response_Quantity__c</members>
+		<members>Module_Response__c.User_Trailblazer__c</members>
 		<members>Module_Response__c.User__c</members>
 		<members>Module__c.Active__c</members>
 		<members>Module__c.Description__c</members>
@@ -62,6 +63,10 @@
 		<members>User_Trail__c.Status__c</members>
 		<members>User_Trail__c.Trail__c</members>
 		<members>User_Trail__c.User__c</members>
+		<members>User_Trailblazer__c.Accumulated_Score__c</members>
+		<members>User_Trailblazer__c.Rank__c</members>
+		<members>User_Trailblazer__c.Type__c</members>
+		<members>User_Trailblazer__c.User__c</members>
 		<name>CustomField</name>
 	</types>
 	<types>

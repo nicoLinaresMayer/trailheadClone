@@ -16,9 +16,9 @@
                 <label>Draft</label>
             </value>
             <value>
-                <fullName>Aswered</fullName>
+                <fullName>Answered</fullName>
                 <default>false</default>
-                <label>Aswered</label>
+                <label>Answered</label>
             </value>
             <value>
                 <fullName>Success</fullName>

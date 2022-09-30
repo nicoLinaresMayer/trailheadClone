@@ -8,7 +8,7 @@ public with sharing class UnitResponseTrigger {
             }
         }
 
-        Map<Id,Unit_Response__c> unitRespWithQuestionRespFromDB = new Map<Id,Unit_Response__c> ([SELECT Id, (SELECT Id, Option__r.Is_Correct__c FROM Question_Responses__r) FROM Unit_Response__c WHERE Id IN :answeredUnitResp]);
+        Map<Id,Unit_Response__c> unitRespWithQuestionRespFromDB = new Map<Id,Unit_Response__c> ([SELECT Id, (SELECT Id, Option__r.Is_Correct__c FROM Question_Responses__r), Unit__r.Unit_Score__c FROM Unit_Response__c WHERE Id IN :answeredUnitResp]);
 
 
         for (Unit_Response__c unitResp : answeredUnitResp) {
@@ -42,18 +42,24 @@ public with sharing class UnitResponseTrigger {
                 completedUnitRespList.add(unitResp);
             }   
         }
-
+        System.debug('UnitREsp--> ' + completedUnitRespList);
+        
         Set<Id> usersIds = new Set<Id>();
-
         for (Unit_Response__c completedUR : completedUnitRespList) {
-            usersIds.add(completedUR.UserID__c);
+            usersIds.add(completedUR.Module_Response__r.User_Trailblazer__r.User__c);
         }
+        System.debug('SET--> ' + usersIds);
 
-        Map<Id,User> usersMap = new Map<Id,User> ([SELECT Id, Accumulated_Score__c FROM User WHERE Id IN :usersIds]);
+        Map<Id,User_Trailblazer__c> usersMap = new Map<Id,User_Trailblazer__c> ([SELECT User__c, Accumulated_Score__c FROM User_Trailblazer__c WHERE User__c IN :usersIds]);
 
         for (Unit_Response__c unitResp : completedUnitRespList) {
             usersMap.get(unitResp.UserID__c).Accumulated_Score__c += unitResp.Score__c;
         }
-        update usersMap.values();
+        System.debug('MAPA--> ' + usersMap);
+        
+        if(usersMap.values().size()>0){
+            update usersMap.values();
+        }
+        
     }
 }

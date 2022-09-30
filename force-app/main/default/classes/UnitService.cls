@@ -1,21 +1,34 @@
 public with sharing class UnitService {
 
     public class CustomException extends Exception{}
-    
+    @AuraEnabled(cacheable=false)
     public static Boolean registerUnitResponse (Id unitId, String jsonAnswer){
 
             Savepoint sp = Database.setSavepoint();
 
         try{
             //Select Unit From DB
-            Unit__c unit = [SELECT Module__c, (SELECT Id FROM Questions__r), (SELECT Id, Number_Tries__c FROM Unit_Responses__r WHERE Module_Response__r.User__c =: UserInfo.getUserId() ORDER BY Number_Tries__c DESC LIMIT 1) FROM Unit__c WHERE Id =: unitId];
+            Unit__c unit = [SELECT Module__c, (SELECT Id FROM Questions__r), (SELECT Id, Number_Tries__c FROM Unit_Responses__r WHERE Module_Response__r.User_Trailblazer__r.User__c =: UserInfo.getUserId() ORDER BY Number_Tries__c DESC LIMIT 1) FROM Unit__c WHERE Id =: unitId];
 
+            /* System.debug('ID USER ' + Userinfo.getUserId());
+            System.debug('QUERY ' + [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress']); */
             //Check If Module Resp Exist
-            Module_Response__c moduleResp = [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User__c =: Userinfo.getUserId() AND Status__c = 'In Progress'];
+            Module_Response__c moduleResp;
+            try {
+                moduleResp = [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress' LIMIT 1];
+            } catch (Exception e) {
+                moduleResp = null;
+            }
+
+            System.debug('moduleRESP '+ moduleResp);
+           
             
             //If not exist, I create it
             if(moduleResp == null){
-                moduleResp = new Module_Response__c(User__c = Userinfo.getUserId(), Module__c = unit.Module__c, Status__c = 'In Progress');
+                User_Trailblazer__c newUTB = new User_Trailblazer__c(User__c = Userinfo.getUserId());
+                insert newUTB;
+
+                moduleResp = new Module_Response__c(User_Trailblazer__c = newUTB.Id, Module__c = unit.Module__c, Status__c = 'In Progress');
                 insert moduleResp;      
             }          
 
@@ -50,7 +63,7 @@ public with sharing class UnitService {
             update unitResp;
             
             //ES NECESARIA LA QUERY?? O PODRIMOS SOLO RETORNAR unitResp?
-            return [SELECT Status__c FROM Unit_Response__c WHERE Id =: unitId].Status__c == 'Completed' ? true : false;
+            return unitResp.Status__c == 'Completed' ? true:false; /* [SELECT Status__c FROM Unit_Response__c WHERE Id =: unitId].Status__c == 'Completed' ? true : false */
 
         }catch(Exception e){
             Database.rollback(sp);
@@ -107,7 +120,7 @@ public with sharing class UnitService {
 
         private static List<Id> getModuleIdsCompleted(Id trailId){
         
-            List<Module_Response__c> moduleResponses = [SELECT Module__c FROM Module_Response__c WHERE Status__c = 'Completed' AND Module__c IN :getModules(trailId) AND User__c =: Userinfo.getUserId()];
+            List<Module_Response__c> moduleResponses = [SELECT Module__c FROM Module_Response__c WHERE Status__c = 'Completed' AND Module__c IN :getModules(trailId) AND User_Trailblazer__r.User__c =: Userinfo.getUserId()];
 
             Set<Id> completedModuleIds = new Set<Id>();
             for(Module_Response__c moduleResp : moduleResponses){

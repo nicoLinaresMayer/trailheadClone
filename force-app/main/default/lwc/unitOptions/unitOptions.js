@@ -5,24 +5,26 @@ const TILE_WRAPPER_UNSELECTED_CLASS = 'tile-wrapper custom-box slds-box slds-p-a
 
 export default class UnitOptions extends LightningElement {
     @api option;
+    @api question
     @api optionSelected;
     optionId;
     
     handleClick(){     
         let optionId = this.option.Id;
-        const boatselect = new CustomEvent("optionselect",{
+        let questionId = this.question.Id
+        const response = new CustomEvent("optionselect",{
             detail:{
-                optionId}})
-        this.dispatchEvent(boatselect);
+                optionId,
+                questionId}})
+        this.dispatchEvent(response);
     }
 
-    get tileClass() { 
-        if(this.option.Id){
-            if(this.optionSelected == this.option.Id){
-                return TILE_WRAPPER_SELECTED_CLASS
-            } else{
-                return TILE_WRAPPER_UNSELECTED_CLASS
-            } 
-        }       
-    }       
+     get tileClass() { 
+         if(this.optionSelected.includes(this.option.Id)){
+            return TILE_WRAPPER_SELECTED_CLASS
+        } else{
+            return TILE_WRAPPER_UNSELECTED_CLASS
+        }     
+    }    
+  
 }
