@@ -3,13 +3,12 @@ public with sharing class UnitResponseTrigger {
         List<Unit_Response__c> answeredUnitResp = new List<Unit_Response__c>();
 
         for(Unit_Response__c unitRes :unitRespList){
-            if(unitRes.Stage_Unit_Response__c == 'Answered' && oldUnitRespMap.get(unitRes.Id).Stage_Unit_Response__c == 'Draft'){
+            if(unitRes.Stage_Unit_Response__c == 'Answered' && oldUnitRespMap.get(unitRes.Id).Stage_Unit_Response__c != 'Success'){
                 answeredUnitResp.add(unitRes);
             }
         }
 
         Map<Id,Unit_Response__c> unitRespWithQuestionRespFromDB = new Map<Id,Unit_Response__c> ([SELECT Id, (SELECT Id, Option__r.Is_Correct__c FROM Question_Responses__r), Unit__r.Unit_Score__c FROM Unit_Response__c WHERE Id IN :answeredUnitResp]);
-
 
         for (Unit_Response__c unitResp : answeredUnitResp) {
             unitResp.Status__c = 'Completed';
@@ -42,24 +41,17 @@ public with sharing class UnitResponseTrigger {
                 completedUnitRespList.add(unitResp);
             }   
         }
-        System.debug('UnitREsp--> ' + completedUnitRespList);
         
         Set<Id> usersIds = new Set<Id>();
         for (Unit_Response__c completedUR : completedUnitRespList) {
-            usersIds.add(completedUR.Module_Response__r.User_Trailblazer__r.User__c);
+            usersIds.add(completedUR.UserID__c);
         }
-        System.debug('SET--> ' + usersIds);
 
         Map<Id,User_Trailblazer__c> usersMap = new Map<Id,User_Trailblazer__c> ([SELECT User__c, Accumulated_Score__c FROM User_Trailblazer__c WHERE User__c IN :usersIds]);
 
         for (Unit_Response__c unitResp : completedUnitRespList) {
-            usersMap.get(unitResp.UserID__c).Accumulated_Score__c += unitResp.Score__c;
+            usersMap.get(unitResp.UserTrailBlazerID__c).Accumulated_Score__c += unitResp.Score__c;
         }
-        System.debug('MAPA--> ' + usersMap);
-        
-        if(usersMap.values().size()>0){
-            update usersMap.values();
-        }
-        
+        update usersMap.values();
     }
 }

@@ -2,7 +2,7 @@ public with sharing class UnitService {
 
     public class CustomException extends Exception{}
     @AuraEnabled(cacheable=false)
-    public static Boolean registerUnitResponse (Id unitId, String jsonAnswer){
+    public static Integer registerUnitResponse (Id unitId, String jsonAnswer){
 
             Savepoint sp = Database.setSavepoint();
 
@@ -10,18 +10,13 @@ public with sharing class UnitService {
             //Select Unit From DB
             Unit__c unit = [SELECT Module__c, (SELECT Id FROM Questions__r), (SELECT Id, Number_Tries__c FROM Unit_Responses__r WHERE Module_Response__r.User_Trailblazer__r.User__c =: UserInfo.getUserId() ORDER BY Number_Tries__c DESC LIMIT 1) FROM Unit__c WHERE Id =: unitId];
 
-            /* System.debug('ID USER ' + Userinfo.getUserId());
-            System.debug('QUERY ' + [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress']); */
             //Check If Module Resp Exist
             Module_Response__c moduleResp;
             try {
-                moduleResp = [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress' LIMIT 1];
+                moduleResp = [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress'];
             } catch (Exception e) {
                 moduleResp = null;
             }
-
-            System.debug('moduleRESP '+ moduleResp);
-           
             
             //If not exist, I create it
             if(moduleResp == null){
@@ -30,31 +25,51 @@ public with sharing class UnitService {
 
                 moduleResp = new Module_Response__c(User_Trailblazer__c = newUTB.Id, Module__c = unit.Module__c, Status__c = 'In Progress');
                 insert moduleResp;      
-            }          
+            }
+            
+            //Check If UnitResp Exist
+            Unit_Response__c unitResp;
+            try {
+                unitResp = [SELECT Id, Status__c, Stage_Unit_Response__c FROM Unit_Response__c WHERE Module_Response__r.Module__c =: unit.Module__c AND Module_Response__r.User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Unit__c =: unitId];
+                
+            } catch (Exception e) {
+                unitResp = null;
+            }
 
-            //Create & Insert a Unit Response
-            Unit_Response__c unitResp = new Unit_Response__c(Unit__c = unitId, Module_Response__c = moduleResp.Id, Stage_Unit_Response__c = 'Draft');
-           
+            //If not exist, I create it
+            if(unitResp == null){
+                unitResp = new Unit_Response__c(Unit__c = unitId, Module_Response__c = moduleResp.Id, Stage_Unit_Response__c = 'Draft');
+                insert unitResp; 
+            }else if(unitResp.Status__c == 'Completed'){
+                throw new CustomException('The unit is already completed');
+            }
             //Add number of tries
             unitResp.Number_Tries__c = !unit.Unit_Responses__r.isEmpty() ? unit.Unit_Responses__r[0].Number_Tries__c + 1 : 1;
-            insert unitResp;
-
+            
             //Create & Insert a Questions Response
             Map<Id,Id> answerMap = (Map<Id,Id>)JSON.deserializeStrict(jsonAnswer, Map<Id,Id>.class);
 
-            List<Question_Response__c> questionRespList = new List<Question_Response__c>();
-
-            for(Question__c question : unit.Questions__r){
-                if(answerMap.containsKey(question.Id)){
-                questionRespList.add(new Question_Response__c(Question__c = question.Id, Unit_Response__c = unitResp.Id, Option__c = answerMap.get(question.Id)));
-                }else{
-                    throw new CustomException('La pregunta'
-                    + question.Name + 'no fue respondida y es requerida!');
+            List<Question_Response__c> questionRespList = [SELECT Id, Option__c FROM Question_Response__c WHERE Unit_Response__r.Unit__c =: unitId];
+            
+            //If not exist, I create it
+            if(questionRespList.size() == 0){
+                for(Question__c question : unit.Questions__r){
+                    if(answerMap.containsKey(question.Id)){
+                    questionRespList.add(new Question_Response__c(Question__c = question.Id, Unit_Response__c = unitResp.Id, Option__c = answerMap.get(question.Id)));
+                    }else{
+                        throw new CustomException('La pregunta'
+                        + question.Name + 'no fue respondida y es requerida!');
+                    }
+                }      
+                insert questionRespList;
+            }else{
+                for (Question__c  question : unit.Questions__r) {
+                    for (Question_Response__c qResp : questionRespList) {
+                        qResp.Option__c = answerMap.get(question.Id);
+                    }
                 }
-            
+                update questionRespList;
             }
-            
-            insert questionRespList;
         
             //Update Unit Response with a stage 'Answered' to shoot the Trigger
 
@@ -62,14 +77,14 @@ public with sharing class UnitService {
             
             update unitResp;
             
-            //ES NECESARIA LA QUERY?? O PODRIMOS SOLO RETORNAR unitResp?
-            return unitResp.Status__c == 'Completed' ? true:false; /* [SELECT Status__c FROM Unit_Response__c WHERE Id =: unitId].Status__c == 'Completed' ? true : false */
+            Unit_Response__c finalResp = [SELECT Status__c, Number_Tries__c FROM Unit_Response__c WHERE Id =: unitResp.Id];
+
+            return finalResp.Status__c == 'Completed' ? 0 : (Integer)finalResp.Number_Tries__c;
 
         }catch(Exception e){
             Database.rollback(sp);
             throw e;
         }
-
     }
 
     public class TrailWrapper{ 
@@ -100,7 +115,6 @@ public with sharing class UnitService {
     
     @AuraEnabled(cacheable=true)
     public static TrailWrapper getTrailWrapper(Id trailId){
-        System.debug('Estoy en getTrailWrapper');
         //New Instance of TrailWrapper
         TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c, Trail_Time__c, Trail_Score__c FROM Trail__c WHERE Id =: trailId], getModules(trailId), getModuleIdsCompleted(trailId), getUnitIdsCompleted(trailId));
 
