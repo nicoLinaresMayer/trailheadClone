@@ -6,5 +6,13 @@
       </template>
     </lightning-card>
   </template>
-  <lightning-button class="slds-align_absolute-center" variant="brand" label="Submit" title="Submit" onclick={handleSubmit}></lightning-button>
+  <lightning-button if:true={questionList} class="slds-align_absolute-center" variant="brand" label="Submit" title="Submit" onclick={handleSubmit}></lightning-button>
+  <template if:false={questionList}>
+    <lightning-card  variant="Narrow" class="slds-text-align_center">
+      <div class="demo-only" style="padding:0.5rem;background:#16325c">
+        <div class="slds-text-color_inverse">UNIT COMPLETED</div>
+      </div>
+        <img src={imageUnitCompleted} alt="" width="100%" >
+    </lightning-card>
+  </template>
 </template>

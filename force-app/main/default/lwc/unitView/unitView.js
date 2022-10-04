@@ -2,7 +2,7 @@ import { LightningElement, api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class UnitView extends NavigationMixin(LightningElement) {
-    @api unitList;
+    @api unit;
 
     viewRecord(event) {
         // Navigate to Unit__c record page

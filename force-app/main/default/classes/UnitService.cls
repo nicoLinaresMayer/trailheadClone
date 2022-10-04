@@ -10,21 +10,23 @@ public with sharing class UnitService {
             //Select Unit From DB
             Unit__c unit = [SELECT Module__c, (SELECT Id FROM Questions__r), (SELECT Id, Number_Tries__c FROM Unit_Responses__r WHERE Module_Response__r.User_Trailblazer__r.User__c =: UserInfo.getUserId() ORDER BY Number_Tries__c DESC LIMIT 1) FROM Unit__c WHERE Id =: unitId];
 
+            //Check If User Trailblazer Exist
+            User_Trailblazer__c userTB ;
+            try {
+                userTB = [SELECT Id, Accumulated_Score__c, Rank__c FROM User_Trailblazer__c WHERE User__c = :UserInfo.getUserId()];
+            } catch (Exception e) { //If not exist, I create it
+                userTB = new User_Trailblazer__c(User__c = Userinfo.getUserId(), Accumulated_Score__c = 0);
+                insert userTB;
+            }
+           
             //Check If Module Resp Exist
             Module_Response__c moduleResp;
             try {
                 moduleResp = [SELECT Id FROM Module_Response__c WHERE Module__c =: unit.Module__c AND User_Trailblazer__r.User__c =: Userinfo.getUserId() AND Status__c = 'In Progress'];
-            } catch (Exception e) {
-                moduleResp = null;
-            }
-            
-            //If not exist, I create it
-            if(moduleResp == null){
-                User_Trailblazer__c newUTB = new User_Trailblazer__c(User__c = Userinfo.getUserId());
-                insert newUTB;
 
-                moduleResp = new Module_Response__c(User_Trailblazer__c = newUTB.Id, Module__c = unit.Module__c, Status__c = 'In Progress');
-                insert moduleResp;      
+            } catch (Exception e) { //If not exist, I create it
+                moduleResp = new Module_Response__c(User_Trailblazer__c = userTB.Id, Module__c = unit.Module__c, Status__c = 'In Progress');
+                insert moduleResp;  
             }
             
             //Check If UnitResp Exist
@@ -160,15 +162,18 @@ public with sharing class UnitService {
         @AuraEnabled
         public List<Question__c> questionList;    
         //Listado de Preguntas con Opciones relacionadas
+        @AuraEnabled
+        public Boolean isCompleted;
 
-        public UnitWrapper(Unit__c unit, List<Question__c> questionList){
+        public UnitWrapper(Unit__c unit, List<Question__c> questionList, Boolean isCompleted){
             this.unit = unit;
             this.questionList = questionList;
+            this.isCompleted = isCompleted;
         }
     }
 
     @AuraEnabled(cacheable=true)
     public static UnitWrapper getUnitWrapper(Id unitId){
-        return new UnitWrapper([SELECT Id, Content__c, Module__c, Time_Estimated__c, Name, Unit_Score__c FROM Unit__c WHERE Id = :unitId], [SELECT Id, Name, (SELECT Id, Is_Correct__c, Description__c, Name FROM Options__r) FROM Question__c WHERE Unit__c =: unitId]);
+        return new UnitWrapper([SELECT Id, Content__c, Module__c, Time_Estimated__c, Name, Unit_Score__c FROM Unit__c WHERE Id = :unitId], [SELECT Id, Name, (SELECT Id, Is_Correct__c, Description__c, Name FROM Options__r) FROM Question__c WHERE Unit__c =: unitId], [SELECT Id, Status__c FROM Unit_Response__c WHERE Status__c = 'Completed' AND 	UserID__c =: Userinfo.getUserId() AND Unit__c =:unitId].size() > 0 ? true : false);
     }
 }

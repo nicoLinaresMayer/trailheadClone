@@ -1,5 +1,5 @@
-trigger UserTrailblazer on User_Trailblazer__c (after update) {
- /*    for(User_Trailblazer__c user : Trigger.new){
+trigger UserTrailblazer on User_Trailblazer__c (before update) {
+    for(User_Trailblazer__c user : Trigger.new){
         if(user.Accumulated_Score__c < 200){
             user.Rank__c = 'SCOUT';
         }else if(user.Accumulated_Score__c < 3000){
@@ -15,5 +15,5 @@ trigger UserTrailblazer on User_Trailblazer__c (after update) {
         }else{
             user.Rank__c = 'RANGER';
         }
-    } */
+    }
 }

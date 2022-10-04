@@ -6,5 +6,8 @@
         <description>This is a Array with Related Questions to Unit</description>
         <fieldName>questionList</fieldName>
     </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>refresh</fieldName>
+    </lightningMessageFields>
     <masterLabel>IndividualProject</masterLabel>
 </LightningMessageChannel>

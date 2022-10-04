@@ -1,9 +1,9 @@
 import { LightningElement, wire, api } from 'lwc';
-import { MessageContext, subscribe, APPLICATION_SCOPE } from 'lightning/messageService';
+import { MessageContext, subscribe, publish } from 'lightning/messageService';
 import INDV_PROJECT from '@salesforce/messageChannel/IndividualProject__c'
 import registerUnitResponse from "@salesforce/apex/UnitService.registerUnitResponse"
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-
+import UNIT_COMPLETED_PNG from '@salesforce/resourceUrl/unitCompleted';
 export default class UnitQuestions extends LightningElement {
     questionList;
     subscription = null;
@@ -11,6 +11,7 @@ export default class UnitQuestions extends LightningElement {
     optionSelectedMap = {};
     optionSelected = [];
     @api recordId;
+    imageUnitCompleted = UNIT_COMPLETED_PNG;
 
     @wire(MessageContext)
     messageContext;
@@ -23,8 +24,7 @@ export default class UnitQuestions extends LightningElement {
             this.messageContext,
             INDV_PROJECT,
             (message) => 
-            {this.questionList = message.questionList}, 
-            {scope: APPLICATION_SCOPE}
+            {this.questionList = message.questionList}
             );
     }    
 
@@ -38,7 +38,6 @@ export default class UnitQuestions extends LightningElement {
     handleSubmit(){        
         registerUnitResponse({unitId: this.recordId, jsonAnswer: JSON.stringify(this.optionSelectedMap)})
         .then((res)=>{
-            console.log('EN EL THEN');
             let flag = res == 0 ? true : false;
             if(flag){
                 this.dispatchEvent(new ShowToastEvent({
@@ -46,7 +45,7 @@ export default class UnitQuestions extends LightningElement {
                     message: 'Answer Submited',
                     variant: 'success'
                 }));
-
+                publish(this.messageContext, INDV_PROJECT, {refresh: true});
             }else{
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'Wrong Answer',

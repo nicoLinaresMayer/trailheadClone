@@ -1,8 +1,8 @@
 <template>
     <lightning-card  variant="Narrow" if:true={unit} title={unit.Name} icon-name="standard:account">
         <lightning-layout multiple-rows class="slds-p-right_small">
-            <p class="slds-p-horizontal_small">Unit Estimated Time: {unit.Time_Estimated__c} minutes</p>
             <p class="slds-p-horizontal_small">Unit Score: {unit.Unit_Score__c} points</p>
+            <p class="slds-p-horizontal_small">Unit Estimated Time: {unit.Time_Estimated__c} minutes</p>
         </lightning-layout><br>
         <p class="slds-p-horizontal_small">{unit.Content__c}</p>
     </lightning-card>

@@ -6,7 +6,7 @@
         </h3>
         <p class="slds-p-horizontal_small">Description: {trail.Description__c}</p>
         <p class="slds-p-horizontal_small">Estimated Time: {trail.Trail_Time__c} minutes</p>
-        <p class="slds-p-horizontal_small">Trail Points: {trail.Trail_Score__c}</p>
+        <p class="slds-p-horizontal_small">Trail Points: {trail.Trail_Score__c} points</p>
         <div slot="footer">
             <template if:true={progressTrail}>
                 <p>Trail Progress {progressTrail}%</p>
@@ -17,5 +17,9 @@
             </template>
        </div>                
     </lightning-card>
-        <c-module-view module-list={modulesList}></c-module-view>
+    <lightning-card variant="Narrow" title="MODULES" icon-name="standard:account">
+        <template if:true={modulesList} for:each={modulesList} for:item="module">
+            <c-module-view key={module.Id} module={module} passed-module-ids={passedModuleIds}></c-module-view>
+        </template>
+    </lightning-card>
 </template>
